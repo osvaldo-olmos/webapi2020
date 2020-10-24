@@ -21,7 +21,8 @@ namespace TodoApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<TodoContext>(opt => opt.UseSqlite(
+                                            Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
