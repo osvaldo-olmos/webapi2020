@@ -21,7 +21,7 @@ namespace TodoApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddDbContext<TodoContext>(opt => opt.UseSqlite(
+            services.AddDbContext<TodoContext>(opt => opt.UseMySQL(
                                             Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers();
 
