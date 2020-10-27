@@ -12,11 +12,11 @@ namespace TodoApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TodoListController : ControllerBase
+    public class TodoListsController : ControllerBase
     {
         private readonly TodoContext _context;
 
-        public TodoListController(TodoContext context)
+        public TodoListsController(TodoContext context)
         {
             _context = context;
         }
