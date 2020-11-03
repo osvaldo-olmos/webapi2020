@@ -10,7 +10,7 @@ using TodoApi.Dtos;
 
 namespace TodoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/todos")]
     [ApiController]
     public class TodoController : ControllerBase
     {

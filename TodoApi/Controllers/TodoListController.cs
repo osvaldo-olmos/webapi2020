@@ -10,7 +10,7 @@ using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/todolists")]
     [ApiController]
     public class TodoListController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemList>>> GetTodoItemLists()
         {
-            return await _context.TodoItemLists.ToListAsync();
+            return await _context.TodoItemLists.Include(x => x.TodoItems).ToListAsync();
         }
 
         // GET: api/TodoList/5
@@ -38,6 +38,8 @@ namespace TodoApi.Controllers
             {
                 return NotFound();
             }
+
+            //await _context.Entry(todoItemList).Collection(x => x.TodoItems);
 
             return todoItemList;
         }
