@@ -39,7 +39,7 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
-            //await _context.Entry(todoItemList).Collection(x => x.TodoItems);
+            await _context.Entry(todoItemList).Collection(x => x.TodoItems).LoadAsync();
 
             return todoItemList;
         }
@@ -96,9 +96,10 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
+            await _context.Entry(todoItemList).Collection(x => x.TodoItems).LoadAsync();
             if(todoItemList.TodoItems.Count !=0)
             {
-                return BadRequest(); //TODO: Retornar un error message correcto.
+                return BadRequest("Cannot delete a non empty list");
             }
 
             _context.TodoItemLists.Remove(todoItemList);
@@ -107,9 +108,125 @@ namespace TodoApi.Controllers
             return todoItemList;
         }
 
+        [HttpPost("{id}/todo")]
+        public async Task<ActionResult<TodoItemList>> PostTodoItemIntoList(long id, NewTodoItemDTO todoItemDTO)
+        {
+            var todoItemList = await _context.TodoItemLists.FindAsync(id);
+            if (todoItemList == null)
+            {
+                return NotFound();
+            }
+            await _context.Entry(todoItemList).Collection(x => x.TodoItems).LoadAsync();
+
+            var todoItem = new TodoItem
+            {
+                IsComplete = todoItemDTO.IsComplete,
+                Name = todoItemDTO.Name
+            };
+
+            todoItemList.TodoItems.Add(todoItem);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) when (!TodoItemListExists(id))
+            {
+                return NotFound();
+            }
+
+            return CreatedAtAction("PostTodoItemIntoList", new { id = todoItem.Id }, TodoController.ItemToDTO(todoItem));
+        }
+
+        [HttpPut("{id}/todos/{todoId}")]
+        public async Task<IActionResult> PutTodoItemIntoList(long id, long todoId)
+        {
+
+            var todoItemList = await _context.TodoItemLists.FindAsync(id);
+            if (todoItemList == null)
+            {
+                return NotFound("list not found");
+            }
+
+            var todoItem = await _context.TodoItems.FindAsync(todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            await _context.Entry(todoItemList).Collection(x => x.TodoItems).LoadAsync();
+            todoItemList.TodoItems.Add(todoItem);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemListExists(id))
+                {
+                    return NotFound("list not found");
+                }
+
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/todos/{todoId}")]
+        public async Task<IActionResult> RemoveTodoItemFromList(long id, long todoId)
+        {
+
+            var todoItemList = await _context.TodoItemLists.FindAsync(id);
+            if (todoItemList == null)
+            {
+                return NotFound("list not found");
+            }
+
+            var todoItem = await _context.TodoItems.FindAsync(todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            await _context.Entry(todoItemList).Collection(x => x.TodoItems).LoadAsync();
+            todoItemList.TodoItems.Remove(todoItem);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemListExists(id))
+                {
+                    return NotFound("list not found");
+                }
+
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
+        //TODO: Hacer una implementacion generica!
         private bool TodoItemListExists(long id)
         {
             return _context.TodoItemLists.Any(e => e.Id == id);
+        }
+
+        private bool TodoItemExists(long id)
+        {
+            return _context.TodoItems.Any(e => e.Id == id);
         }
     }
 }

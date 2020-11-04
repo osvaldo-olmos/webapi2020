@@ -39,6 +39,7 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
 
+
             return ItemToDTO(todoItem);
         }
 
@@ -113,7 +114,7 @@ namespace TodoApi.Controllers
             return _context.TodoItems.Any(e => e.Id == id);
         }
 
-        private static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
+        public static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
                 new TodoItemDTO
                 {
                     Id = todoItem.Id,
