@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models
 {
-    public class TodoContext : DbContext
+    public class TodoContext : IdentityDbContext
     {
         public TodoContext(DbContextOptions<TodoContext> options)
             : base(options)
