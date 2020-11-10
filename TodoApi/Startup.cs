@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,12 @@ namespace TodoApi
         {
 
             services.AddDbContext<TodoContext>(opt => opt.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
+            
+            //===== Add Identity ========
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<TodoContext>()
+                .AddDefaultTokenProviders();
+            
             services.AddControllers();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
