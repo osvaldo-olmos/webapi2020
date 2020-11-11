@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models
 {
-    public class TodoContext : IdentityDbContext
+    public class TodoContext : IdentityDbContext<ApplicationUser>
     {
         public TodoContext(DbContextOptions<TodoContext> options)
             : base(options)

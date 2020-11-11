@@ -15,7 +15,7 @@ using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/users")]
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -33,7 +33,7 @@ namespace TodoApi.Controllers
             _configuration = configuration;
         }
        
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<ActionResult<string>> Register([FromBody] RegisterDTO dto)
         {
             var user = new ApplicationUser
@@ -55,7 +55,7 @@ namespace TodoApi.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<ActionResult<string>> Login([FromBody] LoginDTO dto)
         {
             var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
