@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Dtos;
@@ -21,24 +22,27 @@ namespace TodoApi.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly TodoContext _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            TodoContext context
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _context = context;
         }
-       
+
         [HttpPost("register")]
         public async Task<ActionResult<string>> Register([FromBody] RegisterDTO dto)
         {
             var user = new ApplicationUser
             {
-                UserName = dto.Email, 
+                UserName = dto.Email,
                 Email = dto.Email
             };
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -49,7 +53,8 @@ namespace TodoApi.Controllers
                 return GenerateJwtToken(dto.Email, user);
 
                 //TODO should I return CreatedAtAction ???
-            }else
+            }
+            else
             {
                 throw new ApplicationException("UNKNOWN_ERROR"); //TODO resolver con un retorno de error correcto
             }
@@ -59,17 +64,26 @@ namespace TodoApi.Controllers
         public async Task<ActionResult<string>> Login([FromBody] LoginDTO dto)
         {
             var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
-            
+
             if (result.Succeeded)
             {
                 var appUser = _userManager.Users.SingleOrDefault(r => r.Email == dto.Email);
                 return GenerateJwtToken(dto.Email, appUser);
-            }else
+            }
+            else
             {
                 throw new ApplicationException("Invalid Login"); //TODO resolver con un retorno de error correcto
             }
         }
-        
+
+        [HttpGet("{id}/todos")]
+
+        public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItems(string id)
+        {
+            return await _context.TodoItems.Where( i => i.Responsible.Id == id).Select(item => ItemToDTO(item)).ToListAsync();
+        }
+
+
         private string GenerateJwtToken(string email, IdentityUser user)
         {
             var claims = new List<Claim>
@@ -93,5 +107,13 @@ namespace TodoApi.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
+        new TodoItemDTO
+        {
+            Id = todoItem.Id,
+            Name = todoItem.Name,
+            IsComplete = todoItem.IsComplete
+        };
     }
 }
