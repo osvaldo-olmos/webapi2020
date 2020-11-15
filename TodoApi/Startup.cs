@@ -72,6 +72,13 @@ namespace TodoApi
                 app.UseDeveloperExceptionPage();
             }
 
+            // == CORS policies ==
+            app.UseCors(builder => {
+                builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+            });
+
             app.UseHttpsRedirection();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
