@@ -80,7 +80,104 @@ namespace TodoApi.Controllers
 
         public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItems(string id)
         {
-            return await _context.TodoItems.Where( i => i.Responsible.Id == id).Select(item => ItemToDTO(item)).ToListAsync();
+            return await _context.TodoItems.Where(i => i.Responsible.Id == id).Select(item => ItemToDTO(item)).ToListAsync();
+        }
+
+        [HttpPut("{id}/todos/{todoId}")]
+        public async Task<IActionResult> AddResponsibleToItem(string id, long todoId)
+        {
+
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null)
+            {
+                return NotFound("user not found");
+            }
+
+            var todoItem = await _context.TodoItems.FindAsync(todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            todoItem.Responsible = appUser;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                var userExists = await UserExists(id);
+                if (!userExists)
+                {
+                    return NotFound("user not found");
+                }
+
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/todos/{todoId}")]
+        public async Task<IActionResult> UnnasignResponsibleFromItem(string id, long todoId)
+        {
+
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null)
+            {
+                return NotFound("user not found");
+            }
+
+            var todoItem = await _context.TodoItems.FindAsync(todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            if(!appUser.Equals(todoItem.Responsible))
+            {
+                return NotFound("Item is not assigned to the given user");
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                var userExists = await UserExists(id);
+                if (!userExists)
+                {
+                    return NotFound("user not found");
+                }
+
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
+
+
+        private bool TodoItemExists(long id)
+        {
+            return _context.TodoItems.Any(e => e.Id == id);
+        }
+
+
+        private async Task<bool> UserExists(string id)
+        {
+            var appUser = await _userManager.FindByIdAsync(id);
+
+            return appUser != null;
         }
 
 
