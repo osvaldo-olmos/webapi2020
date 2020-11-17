@@ -9,6 +9,7 @@ using TodoApi.Models;
 using TodoApi.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 
 namespace TodoApi.Controllers
 {
@@ -18,10 +19,12 @@ namespace TodoApi.Controllers
     public class TodoController : ControllerBase
     {
         private readonly TodoContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TodoController(TodoContext context)
+        public TodoController(TodoContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager =userManager;
         }
 
         // GET: api/Todo
@@ -84,10 +87,24 @@ namespace TodoApi.Controllers
         [HttpPost]
         public async Task<ActionResult<TodoItemDTO>> PostTodoItem(NewTodoItemDTO todoItemDTO)
         {
+            ApplicationUser appUser =null;
+            
+            if(todoItemDTO.UserId !=null)
+            {
+                appUser = await _userManager.FindByIdAsync(todoItemDTO.UserId);
+
+                if(appUser is null)
+                {
+                    return NotFound("Invalid userId");
+                }
+
+            }
+
             var todoItem = new TodoItem
             {
                 IsComplete = todoItemDTO.IsComplete,
-                Name = todoItemDTO.Name
+                Name = todoItemDTO.Name,
+                Responsible = appUser
             };
 
             _context.TodoItems.Add(todoItem);
