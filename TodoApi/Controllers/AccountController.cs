@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Dtos;
@@ -21,16 +22,19 @@ namespace TodoApi.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly TodoContext _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            TodoContext context
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _context =context;
         }
        
         [HttpPost("register")]
@@ -69,6 +73,21 @@ namespace TodoApi.Controllers
                 throw new ApplicationException("Invalid Login"); //TODO resolver con un retorno de error correcto
             }
         }
+
+        [HttpGet("{id}/todos")]
+        public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItemsByUser(string id)
+        {
+            return await _context.TodoItems.Where(i => i.Responsible.Id == id)
+                                            .Select(item => ItemToDTO(item)).ToListAsync();
+        }
+
+        public static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
+                new TodoItemDTO
+                {
+                    Id = todoItem.Id,
+                    Name = todoItem.Name,
+                    IsComplete = todoItem.IsComplete
+                };
         
         private string GenerateJwtToken(string email, IdentityUser user)
         {
