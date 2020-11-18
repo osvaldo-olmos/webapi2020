@@ -6,6 +6,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -74,12 +76,89 @@ namespace TodoApi.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("{id}/todos")]
         public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItemsByUser(string id)
         {
             return await _context.TodoItems.Where(i => i.Responsible.Id == id)
                                             .Select(item => ItemToDTO(item)).ToListAsync();
         }
+
+        [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPut("{id}/todos/{todoId}")]
+        public async Task<IActionResult> AssignResponsibleToItem(string id, long todoId)
+        {
+
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null)
+            {
+                return NotFound("user not found");
+            }
+
+            var todoItem = await _context.TodoItems.FindAsync(todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            todoItem.Responsible =appUser;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
+        [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
+        [HttpDelete("{id}/todos/{todoId}")]
+        public async Task<IActionResult> UnnassignResponsibleFromItem(string id, long todoId)
+        {
+
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null)
+            {
+                return NotFound("user not found");
+            }
+
+            var todoItem = await _context.TodoItems.Include(i => i.Responsible).FirstOrDefaultAsync(t => t.Id == todoId);
+            if (todoItem == null)
+            {
+                return NotFound("todo item not found");
+            }
+
+            if(!appUser.Equals(todoItem.Responsible))
+            {
+                return NotFound("item does not belong to user");
+            }
+
+            todoItem.Responsible =null;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemExists(todoId))
+                {
+                    return NotFound("todo item not found");
+                }
+
+            }
+
+            return NoContent();
+        }
+
 
         public static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
                 new TodoItemDTO
@@ -89,6 +168,15 @@ namespace TodoApi.Controllers
                     IsComplete = todoItem.IsComplete
                 };
         
+
+
+
+        private bool TodoItemExists(long id)
+        {
+            return _context.TodoItems.Any(e => e.Id == id);
+        }
+
+
         private string GenerateJwtToken(string email, IdentityUser user)
         {
             var claims = new List<Claim>
