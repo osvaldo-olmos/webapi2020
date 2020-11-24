@@ -85,7 +85,7 @@ namespace TodoApi.Controllers
         }
 
         [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut("{id}/todos/{todoId}")]
+        [HttpPost("{id}/todos/{todoId}")]
         public async Task<IActionResult> AssignResponsibleToItem(string id, long todoId)
         {
 

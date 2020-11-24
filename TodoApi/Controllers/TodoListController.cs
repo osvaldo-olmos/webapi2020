@@ -141,8 +141,8 @@ namespace TodoApi.Controllers
             return CreatedAtAction("PostTodoItemIntoList", new { id = todoItem.Id }, TodoController.ItemToDTO(todoItem));
         }
 
-        [HttpPut("{id}/todos/{todoId}")]
-        public async Task<IActionResult> PutTodoItemIntoList(long id, long todoId)
+        [HttpPost("{id}/todos/{todoId}")]
+        public async Task<IActionResult> AddTodoItemIntoList(long id, long todoId)
         {
 
             var todoItemList = await _context.TodoItemLists.FindAsync(id);
