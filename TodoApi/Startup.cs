@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Models;
+using TodoApi.Services;
 
 namespace TodoApi
 {
@@ -29,6 +30,8 @@ namespace TodoApi
 
             services.AddDbContext<TodoContext>(opt => opt.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddScoped<ITodoItemService, TodoItemService>();
+            
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<TodoContext>()

@@ -10,6 +10,7 @@ using TodoApi.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using TodoApi.Services;
 
 namespace TodoApi.Controllers
 {
@@ -21,17 +22,22 @@ namespace TodoApi.Controllers
         private readonly TodoContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public TodoController(TodoContext context, UserManager<ApplicationUser> userManager)
+        private readonly ITodoItemService _todoItemService;
+
+        public TodoController(TodoContext context, UserManager<ApplicationUser> userManager,
+                                ITodoItemService todoItemService)
         {
             _context = context;
             _userManager =userManager;
+            _todoItemService =todoItemService;
         }
 
         // GET: api/Todo
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItems()
         {
-            return await _context.TodoItems.Select(item => ItemToDTO(item)).ToListAsync();
+            var todoItems = await _todoItemService.GetAllAsync();
+            return todoItems.Select(item => ItemToDTO(item)).ToList();
         }
 
         // GET: api/Todo/5
