@@ -19,15 +19,13 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoController : ControllerBase
     {
-        private readonly TodoContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly ITodoItemService _todoItemService;
 
-        public TodoController(TodoContext context, UserManager<ApplicationUser> userManager,
+        public TodoController(UserManager<ApplicationUser> userManager,
                                 ITodoItemService todoItemService)
         {
-            _context = context;
             _userManager =userManager;
             _todoItemService =todoItemService;
         }
@@ -120,11 +118,6 @@ namespace TodoApi.Controllers
             }
 
             return NoContent();
-        }
-
-        private bool TodoItemExists(long id)
-        {
-            return _context.TodoItems.Any(e => e.Id == id);
         }
 
         public static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
