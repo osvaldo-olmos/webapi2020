@@ -24,7 +24,8 @@ namespace TodoApi.Services
 
         public async Task<TodoItem> GetAsync(long id)
         {
-            return await _context.TodoItems.FindAsync(id);
+            return await _context.TodoItems.Include(i => i.Responsible).
+                            FirstOrDefaultAsync( i => i.Id ==id);
         }
 
         public async Task UpdateAsync(long id, TodoItemDTO dto)
