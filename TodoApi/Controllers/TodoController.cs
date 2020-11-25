@@ -44,7 +44,7 @@ namespace TodoApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItemDTO>> GetTodoItem(long id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _todoItemService.GetAsync(id);
 
             if (todoItem == null)
             {
@@ -66,22 +66,17 @@ namespace TodoApi.Controllers
                 return BadRequest();
             }
 
-            var todoItem = await _context.TodoItems.FindAsync(id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            todoItem.Name = todoItemDTO.Name;
-            todoItem.IsComplete = todoItemDTO.IsComplete;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _todoItemService.UpdateAsync(id, todoItemDTO);            
             }
-            catch (DbUpdateConcurrencyException) when (!TodoItemExists(id))
+            catch (ArgumentException e)
             {
-                return NotFound();
+                return BadRequest(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return NotFound(e.Message);
             }
 
             return NoContent();
@@ -101,20 +96,12 @@ namespace TodoApi.Controllers
 
                 if(appUser is null)
                 {
-                    return NotFound("Invalid userId");
+                    return BadRequest("Invalid userId");
                 }
 
             }
 
-            var todoItem = new TodoItem
-            {
-                IsComplete = todoItemDTO.IsComplete,
-                Name = todoItemDTO.Name,
-                Responsible = appUser
-            };
-
-            _context.TodoItems.Add(todoItem);
-            await _context.SaveChangesAsync();
+            var todoItem = await _todoItemService.CreateAsync(todoItemDTO, appUser);
 
             return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, ItemToDTO(todoItem));
         }
@@ -123,14 +110,14 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<TodoItemDTO>> DeleteTodoItem(long id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
-            if (todoItem == null)
+            try
             {
-                return NotFound();
+                await _todoItemService.DeleteAsync(id);            
             }
-
-            _context.TodoItems.Remove(todoItem);
-            await _context.SaveChangesAsync();
+            catch (ArgumentException e)
+            {
+                return NotFound(e.Message);
+            }
 
             return NoContent();
         }
