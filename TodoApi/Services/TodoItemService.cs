@@ -54,7 +54,7 @@ namespace TodoApi.Services
         {
             var todoItem = new TodoItem
             {
-                IsComplete = dto.IsComplete,
+                IsComplete = false,
                 Name = dto.Name,
                 Responsible = appUser
             };
