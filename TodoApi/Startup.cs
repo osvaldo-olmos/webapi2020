@@ -31,6 +31,7 @@ namespace TodoApi
             services.AddDbContext<TodoContext>(opt => opt.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<ITodoItemService, TodoItemService>();
+            services.AddScoped<ITodoListService, TodoListService>();
             
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
