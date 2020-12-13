@@ -17,15 +17,6 @@ namespace TodoApi
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-            // var host =CreateHostBuilder(args).Build();
-
-            // using (var scope = host.Services.CreateScope())
-            // {
-            //     var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
-            //     db.Database.Migrate();
-            // }
-
-            // host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
