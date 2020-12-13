@@ -126,7 +126,7 @@ namespace TodoApi.Controllers
                     Id = todoItem.Id,
                     Name = todoItem.Name,
                     IsComplete = todoItem.IsComplete,
-                    Responsible = todoItem.Responsible.Email
+                    Responsible = todoItem.Responsible is null ? "" : todoItem.Responsible.Email
                 };
     }
 }
