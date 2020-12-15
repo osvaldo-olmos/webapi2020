@@ -14,7 +14,8 @@ using TodoApi.Services;
 
 namespace TodoApi.Controllers
 {
-    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [Route("api/todos")]
     [ApiController]
     public class TodoController : ControllerBase

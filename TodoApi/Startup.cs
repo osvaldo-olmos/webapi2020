@@ -2,6 +2,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +33,7 @@ namespace TodoApi
 
             services.AddScoped<ITodoItemService, TodoItemService>();
             services.AddScoped<ITodoListService, TodoListService>();
-            
+
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<TodoContext>()
@@ -66,6 +67,17 @@ namespace TodoApi
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen();
+
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                    JwtBearerDefaults.AuthenticationScheme);
+
+                defaultAuthorizationPolicyBuilder =
+                    defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,7 +89,8 @@ namespace TodoApi
             }
 
             // == CORS policies ==
-            app.UseCors(builder => {
+            app.UseCors(builder =>
+            {
                 builder.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
