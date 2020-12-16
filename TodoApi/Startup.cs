@@ -96,7 +96,7 @@ namespace TodoApi
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API V1");
-                //c.RoutePrefix = string.Empty; //To serve the Swagger UI at the app's root
+                c.RoutePrefix = string.Empty; //To serve the Swagger UI at the app's root
             });
 
             app.UseRouting();
