@@ -71,7 +71,7 @@ namespace TodoApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TodoContext dataContext)
         {
             if (env.IsDevelopment())
             {
@@ -107,6 +107,8 @@ namespace TodoApi
             {
                 endpoints.MapControllers();
             });
+
+            dataContext.Database.Migrate();
         }
 
         private void AddSwagger(IServiceCollection services)
