@@ -13,7 +13,7 @@ using TodoApi.Services;
 
 namespace TodoApi.Controllers
 {
-    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [Route("api/todolists")]
     [ApiController]
     public class TodoListController : ControllerBase
