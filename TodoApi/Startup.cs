@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using TodoApi.Models;
 using TodoApi.Services;
 
@@ -32,7 +33,7 @@ namespace TodoApi
 
             services.AddScoped<ITodoItemService, TodoItemService>();
             services.AddScoped<ITodoListService, TodoListService>();
-            
+
             //===== Add Identity ========
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<TodoContext>()
@@ -65,7 +66,8 @@ namespace TodoApi
             services.AddControllers();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen();
+            //services.AddSwaggerGen();
+            AddSwagger(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,7 +79,8 @@ namespace TodoApi
             }
 
             // == CORS policies ==
-            app.UseCors(builder => {
+            app.UseCors(builder =>
+            {
                 builder.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
@@ -92,8 +95,8 @@ namespace TodoApi
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API V1");
+                //c.RoutePrefix = string.Empty; //To serve the Swagger UI at the app's root
             });
 
             app.UseRouting();
@@ -103,6 +106,27 @@ namespace TodoApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+        }
+
+        private void AddSwagger(IServiceCollection services)
+        {
+            services.AddSwaggerGen(options =>
+            {
+                var groupName = "v1";
+
+                options.SwaggerDoc(groupName, new OpenApiInfo
+                {
+                    Title = $"Todo {groupName}",
+                    Version = groupName,
+                    Description = "Todo API",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Todo Company",
+                        Email = string.Empty,
+                        Url = new Uri("https://foo.com/"),
+                    }
+                });
             });
         }
     }
