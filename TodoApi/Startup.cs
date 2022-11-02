@@ -135,7 +135,7 @@ namespace TodoApi
                     Description = "Todo API",
                     Contact = new OpenApiContact
                     {
-                        Name = "Todo Company",
+                        Name = "Todo Inc.",
                         Email = string.Empty,
                         Url = new Uri("https://foo.com/"),
                     }
