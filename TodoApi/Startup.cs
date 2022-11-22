@@ -90,6 +90,12 @@ namespace TodoApi
             }
 
             // == CORS policies ==
+            // app.UseCors(builder =>
+            // {
+            //     builder.AllowAnyOrigin()
+            //             .AllowAnyHeader()
+            //             .AllowAnyMethod();
+            // });
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin()
